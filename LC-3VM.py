@@ -1,12 +1,13 @@
 
-# Memory for LC-3 VM (65,536 locations, 16-bit words)
+#memory for LC-3 VM 
+#(65,536 locations, 16-bit words)
 MEMORY_SIZE = 65536
 memory = [0] * MEMORY_SIZE
 
-# LC-3 registers (R0 to R7)
+#LC-3 registers
 registers = [0] * 8
 
-# Special registers: PC (Program Counter) and COND (Condition Flags)
+#special registers
 PC = 0
 COND = 0
 
@@ -14,21 +15,19 @@ COND = 0
 OP_ADD = 0b0001
 OP_AND = 0b0101
 OP_BR = 0b0000
-# ... add more opcodes as needed
 
-PC = 0x3000  # Set starting program counter
+PC = 0x3000  #set starting program counter
 
-# Main loop for the VM
+# main loop for VM
 def run_vm():
     global running
     global PC
     running = True
     while running:
-        # Fetch
         instr = memory[PC]
         PC += 1
 
-        # Decode opcode
+        #decode opcode
         opcode = instr >> 12
 
         if opcode == OP_ADD:
@@ -37,33 +36,33 @@ def run_vm():
             execute_and(instr)
         elif opcode == OP_BR:
             execute_br(instr)
-        elif (instr & 0xF000) == 0xF000:  # Trap instructions check
+        elif (instr & 0xF000) == 0xF000:  
             execute_trap(instr)
         else:
-            running = False  # Halt on unknown instruction
+            running = False  
 
 
-# Define condition flags
-FL_POS = 1  # P
-FL_ZRO = 2  # Z
-FL_NEG = 4  # N
+#condition flags
+FL_POS = 1 
+FL_ZRO = 2  
+FL_NEG = 4  
 
 def update_flags(r):
     global COND
     if registers[r] == 0:
         COND = FL_ZRO
-    elif registers[r] >> 15:  # Check if negative
+    elif registers[r] >> 15: 
         COND = FL_NEG
     else:
         COND = FL_POS
 
-# ADD instruction
+#ADD instruction
 def execute_add(instr):
-    # Destination register
+    #destination register
     r0 = (instr >> 9) & 0x7
-    # First source register
+    #firstsource register
     r1 = (instr >> 6) & 0x7
-    # Immediate mode
+    #immediate mode
     imm_flag = (instr >> 5) & 0x1
 
     if imm_flag:
@@ -75,13 +74,13 @@ def execute_add(instr):
 
     update_flags(r0)
 
-# AND instruction
+#AND instruction
 def execute_and(instr):
-    # Destination register
+    #destination register
     r0 = (instr >> 9) & 0x7
-    # First source register
+    #firstsource register
     r1 = (instr >> 6) & 0x7
-    # Immediate mode
+    # immediate mode
     imm_flag = (instr >> 5) & 0x1
 
     if imm_flag:
@@ -93,7 +92,7 @@ def execute_and(instr):
 
     update_flags(r0)
 
-# Helper function for sign extension
+#helper function
 def sign_extend(x, bit_count):
     if (x >> (bit_count - 1)) & 1:
         x |= (0xFFFF << bit_count)
@@ -126,11 +125,11 @@ def execute_lea(instr):
     update_flags(r0)
 
 def trap_getc():
-    # Trap routine to read a single character from input
+    # trap routine, read single character from input
     registers[0] = ord(input()[0])
 
 def trap_out():
-    # Trap routine to output the character in R0 to the console
+    # trap routine, output character in R0 to console
     print(chr(registers[0]), end='')
 
 def trap_halt():
@@ -138,7 +137,7 @@ def trap_halt():
     global running
     running = False
 
-# Trap vector table
+# trap vector table
 TRAP_GETC = 0x20
 TRAP_OUT = 0x21
 TRAP_HALT = 0x25
@@ -157,19 +156,17 @@ def run_vm():
     global PC
     running = True
     while running:
-        # Fetch instruction
-        instr = memory[PC]  # Fetch the instruction from memory at the PC
+        # fetch instruction
+        instr = memory[PC] 
         PC += 1
 
         # Debugging print
         print(f"PC: {PC}, Instruction: {hex(instr)}, Registers: {registers}, Flags: {COND}")
 
-        # Decode and execute the instruction (as shown before)
         opcode = instr >> 12
-        # Add instruction handling here...
 
-memory[0x3000] = 0xF021  # TRAP OUT (outputs the character in R0)
-registers[0] = ord('A')  # Set R0 to the ASCII value of 'A'
+memory[0x3000] = 0xF021  # trap out
+registers[0] = ord('A')  # set Register0 to ascii value of 'A'
 
-run_vm()  # Start the VM
+run_vm() 
 
